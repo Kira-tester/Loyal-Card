@@ -1,0 +1,102 @@
+AAYA RESIN ART LOYALTY WEBSITE
+DEPLOYMENT GUIDE
+================
+
+WHAT THIS BUILD IS
+------------------
+This folder contains a responsive, installable website prototype. The supplied
+logo.jpg and stamp.jpg are included in the design. The preview card stores its
+sample stamp count in the visitor's browser and demonstrates a four-hour
+cooldown. It does not create an account, issue a real stamp, or grant a real
+reward. Browser storage can be edited or cleared, so it is not fraud resistant.
+
+Do not use this preview as a live loyalty program or collect real customer
+passwords. Firebase Authentication, verified email, Firestore, server-side
+validation, staff redemption, the admin tools, the real rotating QR token, and
+the privacy/account-deletion flows are not connected in this prototype.
+
+QUICK PREVIEW ON YOUR COMPUTER
+------------------------------
+1. Open this folder in Visual Studio Code.
+2. Start a local static web server (for example, the VS Code Live Server
+   extension) and open index.html through that server.
+3. The PWA service worker requires localhost or an HTTPS website. Opening
+   index.html directly as a file will show the page, but offline installation
+   and service-worker features will not work.
+4. Try "Open my loyalty card" and "Add a demo stamp". The sample card is stored
+   only in this browser. Clearing the browser's site data resets it.
+
+PREPARE A REAL CUSTOMER LAUNCH
+------------------------------
+The following backend work is required before posting a customer QR code:
+
+1. Create a Firebase project at https://console.firebase.google.com/.
+   Choose the correct region and review Firebase's current free-tier limits,
+   pricing, and terms. Free service is not guaranteed at every usage level.
+2. Register a web app in the project. Enable Email/Password Authentication
+   and email verification. Configure password reset and authorized domains.
+3. Create a Cloud Firestore database. Implement and test restrictive rules:
+   customers can read their own profile and history; clients must not be able
+   to change stamp counts, cooldown timestamps, rewards, admin settings, or
+   redemption records directly.
+4. Add a trusted backend (for example, Firebase Cloud Functions) to validate
+   the current daily QR token, enforce the four-hour cooldown using server
+   timestamps, issue stamps transactionally, and log reward redemptions. A
+   token placed in a URL is not secret; generate/rotate it on the server and
+   do not rely on browser code for authorization.
+5. Implement staff PIN/authorization and owner-only administration with
+   server-verified roles. Do not put admin credentials or privileged service
+   account keys in website JavaScript.
+6. Complete and publish the privacy notice, marketing consent, data deletion,
+   retention, redemption rules, and applicable regional compliance. The PRD
+   still leaves the reward details, reward expiry, staff PIN policy, and
+   applicable privacy jurisdictions open.
+7. Replace the demo card actions and browser storage in app.js with the
+   authenticated backend flows. Implement customer signup/login/logout,
+   password reset, verified email, card/history, staff redemption, and
+   protected admin screens. Test abuse cases and Firestore rules in the
+   Firebase Emulator Suite before launch.
+8. Update the preview-mode notice and copy to match the verified live service.
+   Test on current iOS Safari and Android Chrome, keyboard navigation,
+   accessibility contrast/tap sizes, mobile performance, and install behavior.
+
+DEPLOY WITH FIREBASE HOSTING
+----------------------------
+After the real backend is implemented and verified:
+
+1. Install Node.js and the Firebase CLI, then sign in:
+     npm install -g firebase-tools
+     firebase login
+2. In this project folder, connect the intended Firebase project:
+     firebase use --add
+3. Initialize Hosting if the project is not already configured:
+     firebase init hosting
+   Select the correct project, set the public directory to this folder (or to
+   your chosen build output directory), configure it as a single-page app only
+   if client-side routes are added, and do not overwrite the existing files.
+4. Add a firebase.json Hosting configuration with HTTPS hosting and appropriate
+   security headers. If deploying the files in this folder as-is, the site
+   entry point is index.html. Deploy only after Firebase authentication,
+   database rules, and server-side stamp validation have been completed.
+5. Preview and deploy:
+     firebase emulators:start
+     firebase hosting:channel:deploy preview
+     firebase deploy --only hosting
+   Deploy functions and Firestore rules separately when they are ready, for
+   example: firebase deploy --only functions,firestore:rules
+6. Add the production domain to Firebase Authentication's authorized domains.
+   Visit the HTTPS Hosting URL and test registration, verification, cooldown,
+   QR token expiry, redemption, rules, deletion, PWA install, and offline
+   behavior. Monitor Firebase usage and configure billing alerts as needed.
+7. Generate the shared counter QR only after deploying the real token flow.
+   Print the production HTTPS URL/token and replace the QR whenever the
+   server-side daily token rotates. Never print a demo URL as a live stamp QR.
+
+OTHER STATIC HOSTS
+------------------
+The files can also be hosted on Netlify or another static HTTPS host. Publish
+the folder containing index.html, styles.css, app.js, manifest.json,
+service-worker.js, logo.jpg, and stamp.jpg. Configure HTTPS and appropriate
+security headers. Hosting the prototype elsewhere does not add Firebase
+authentication, trusted stamping, admin controls, or fraud prevention; these
+still require the backend steps above.

@@ -1,0 +1,17 @@
+{
+  "name": "Aaya Resin Art Loyalty Card",
+  "short_name": "Aaya Rewards",
+  "description": "A little thank-you, every visit.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#161511",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "1280x1280",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
